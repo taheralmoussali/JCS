@@ -12,11 +12,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 	}
 
 	return (
-		<div dir="rtl" className="flex min-h-screen bg-slate-50">
+		<div dir="rtl" className="flex min-h-screen min-w-0 overflow-x-hidden bg-slate-50">
 			<Sidebar />
 			<div className="flex min-w-0 flex-1 flex-col">
 				<Header />
-				<main className="mx-auto w-full max-w-7xl flex-1 p-5 md:p-8">
+				<main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-5 md:p-8">
 					{children}
 				</main>
 			</div>
