@@ -1,0 +1,2 @@
+import {Card,CardContent,CardHeader,CardTitle} from '@/components/ui/card';
+export default function Settings(){return <div className="space-y-6"><div><h1 className="text-3xl font-bold">الإعدادات</h1><p className="text-muted-foreground">إعدادات النظام</p></div><Card><CardHeader><CardTitle>الإدارة</CardTitle></CardHeader><CardContent className="text-sm text-muted-foreground">أضف هنا إدارة المستخدمين والصلاحيات والجداول المرجعية مثل أنواع المساعدة والتصنيفات والمهن.</CardContent></Card></div>}
