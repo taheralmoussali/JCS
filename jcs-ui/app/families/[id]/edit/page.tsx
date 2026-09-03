@@ -49,6 +49,14 @@ const defaultOptions = {
     { id: 5, name: "جامعي" },
     { id: 6, name: "ابتدائي" },
   ],
+  categories: [
+    { id: 1, name: "فقراء" }, 
+    { id: 2, name: "ارملة" }, 
+    { id: 3, name: "ايتام" }, 
+    { id: 4, name: "مريض" }, 
+    { id: 5, name: "ذوو إعاقة" }, 
+    { id: 6, name: "شهداء" }
+  ],
 };
 type Housing = {
   id?: number;
@@ -95,6 +103,7 @@ export default function EditFamilyPage() {
     genders: Option[];
     maritalStatuses: Option[];
     educationLevels: Option[];
+    categories: Option[];
   }>({
     ...defaultOptions,
   });
@@ -106,6 +115,13 @@ export default function EditFamilyPage() {
     address: "",
     phone: "",
     landline_number: "",
+    family_category: "",
+    field_supervisor_1: "",
+    field_supervisor_2: "",
+    study_writer: "",
+    evaluator_1: "",
+    evaluator_2: "",
+    reviewer: "",
     study_date: "",
     assessment_score: "",
   });
@@ -122,12 +138,14 @@ export default function EditFamilyPage() {
       supabase.from("genders").select("id, name").order("id"),
       supabase.from("marital_statuses").select("id, name").order("id"),
       supabase.from("education_levels").select("id, name").order("id"),
-    ]).then(([relationships, genders, maritalStatuses, educationLevels]) =>
+      supabase.from("family_categories").select("id, name").order("id"),
+    ]).then(([relationships, genders, maritalStatuses, educationLevels, categories]) =>
       setOptions({
         relationships: relationships.data?.length ? relationships.data : defaultOptions.relationships,
         genders: genders.data?.length ? genders.data : defaultOptions.genders,
         maritalStatuses: maritalStatuses.data?.length ? maritalStatuses.data : defaultOptions.maritalStatuses,
         educationLevels: educationLevels.data?.length ? educationLevels.data : defaultOptions.educationLevels,
+        categories: categories.data?.length ? categories.data : defaultOptions.categories,
       }),
     );
   }, []);
@@ -143,7 +161,7 @@ export default function EditFamilyPage() {
         supabase
           .from("families")
           .select(
-            "file_number, beneficiary_name, national_id, family_book, address, phone, landline_number, study_date, assessment_score",
+            "file_number, beneficiary_name, national_id, family_book, address, phone, landline_number, family_category, field_supervisor_1, field_supervisor_2, study_writer, evaluator_1, evaluator_2, reviewer, study_date, assessment_score",
           )
           .eq("id", id)
           .single(),
@@ -173,6 +191,13 @@ export default function EditFamilyPage() {
           address: family.address ?? "",
           phone: family.phone ?? "",
           landline_number: family.landline_number ?? "",
+          family_category: String(family.family_category ?? ""),
+          field_supervisor_1: family.field_supervisor_1 ?? "",
+          field_supervisor_2: family.field_supervisor_2 ?? "",
+          study_writer: family.study_writer ?? "",
+          evaluator_1: family.evaluator_1 ?? "",
+          evaluator_2: family.evaluator_2 ?? "",
+          reviewer: family.reviewer ?? "",
           study_date: family.study_date ?? "",
           assessment_score: String(family.assessment_score ?? ""),
         });
@@ -225,6 +250,13 @@ export default function EditFamilyPage() {
         address: form.address || null,
         phone: form.phone || null,
         landline_number: form.landline_number || null,
+        family_category: form.family_category ? Number(form.family_category) : null,
+        field_supervisor_1: form.field_supervisor_1 || null,
+        field_supervisor_2: form.field_supervisor_2 || null,
+        study_writer: form.study_writer || null,
+        evaluator_1: form.evaluator_1 || null,
+        evaluator_2: form.evaluator_2 || null,
+        reviewer: form.reviewer || null,
         study_date: form.study_date || null,
         assessment_score: form.assessment_score
           ? Number(form.assessment_score)
@@ -398,25 +430,52 @@ export default function EditFamilyPage() {
                 ["address", "العنوان", "text"],
                 ["phone", "الهاتف", "tel"],
                 ["landline_number", "الهاتف الأرضي", "tel"],
+                  ["family_category", "التصنيف", "select"],
+                  ["field_supervisor_1", "مشرف الكشف (1)", "text"],
+                  ["field_supervisor_2", "مشرف الكشف (2)", "text"],
+                  ["study_writer", "محرر الدراسة", "text"],
+                  ["evaluator_1", "المقيّم الأول", "text"],
+                  ["evaluator_2", "المقيّم الثاني", "text"],
+                  ["reviewer", "المدقق", "text"],
                 ["study_date", "تاريخ الدراسة", "date"],
                 ["assessment_score", "درجة التقييم", "number"],
               ].map(([field, label, type]) => (
                 <label key={field} className="space-y-2 text-sm">
                   <span>{label}</span>
-                  <input
-                    required={
-                      field === "file_number" || field === "beneficiary_name"
-                    }
-                    type={type}
-                    value={form[field as keyof typeof form]}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        [field]: event.target.value,
-                      }))
-                    }
-                    className={inputClass}
-                  />
+                  {type === "select" ? (
+                    <select
+                      value={form[field as keyof typeof form]}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          [field]: event.target.value,
+                        }))
+                      }
+                      className={inputClass}
+                    >
+                      <option value="">اختر التصنيف</option>
+                      {options.categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      required={
+                        field === "file_number" || field === "beneficiary_name"
+                      }
+                      type={type}
+                      value={form[field as keyof typeof form]}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          [field]: event.target.value,
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                  )}
                 </label>
               ))}
             </div>
