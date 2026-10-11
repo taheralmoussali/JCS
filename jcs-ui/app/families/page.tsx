@@ -1,4 +1,4 @@
-import { supabaseServer } from "@/lib/supabase-server";
+import { createFamiliesQuery, fallbackFamilyCategories } from "@/lib/families-query";
 import Link from "next/link";
 
 type FamiliesPageProps = {
@@ -7,6 +7,7 @@ type FamiliesPageProps = {
     page?: string;
     minScore?: string;
     maxScore?: string;
+    category?: string;
   }>;
 };
 
@@ -16,62 +17,38 @@ export default async function FamiliesPage({ searchParams }: FamiliesPageProps) 
   const filters = await searchParams;
   const query = filters.q?.trim() || "";
   const currentPage = Math.max(1, Number(filters.page) || 1);
-  const minScore = Number(filters.minScore);
-  const maxScore = Number(filters.maxScore);
-  const hasMinScore = Number.isFinite(minScore) && filters.minScore !== "";
-  const hasMaxScore = Number.isFinite(maxScore) && filters.maxScore !== "";
   const from = (currentPage - 1) * pageSize;
   const to = from + pageSize - 1;
-  const supabase = await supabaseServer();
-
-  let familiesQuery = supabase
-    .from("families")
-    .select(`
-      id,
-      file_number,
-      beneficiary_name,
-      national_id,
-      address,
-      phone,
-      study_date,
-      assessment_score,
-      family_categories (
-        id,
-        name
-      )
-    `, { count: "exact" })
-    .order("file_number", { ascending: true });
-
-  if (query) {
-    const fileNumber = Number(query);
-    if (Number.isInteger(fileNumber)) {
-      familiesQuery = familiesQuery.or(
-        `beneficiary_name.ilike.%${query}%,national_id.ilike.%${query}%,phone.ilike.%${query}%,address.ilike.%${query}%,file_number.eq.${fileNumber}`
-      );
-    } else {
-      familiesQuery = familiesQuery.or(
-        `beneficiary_name.ilike.%${query}%,national_id.ilike.%${query}%,phone.ilike.%${query}%,address.ilike.%${query}%`
-      );
-    }
-  }
-
-  if (hasMinScore) familiesQuery = familiesQuery.gte("assessment_score", minScore);
-  if (hasMaxScore) familiesQuery = familiesQuery.lte("assessment_score", maxScore);
-
-  const { data: families, count, error } = await familiesQuery.range(from, to);
+  const { familiesQuery, supabase } = await createFamiliesQuery(filters);
+  const [
+    { data: families, count, error },
+    { data: categories, error: categoriesError },
+  ] = await Promise.all([
+    familiesQuery.range(from, to),
+    supabase.from("family_categories").select("id, name").order("id"),
+  ]);
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / pageSize));
+  const categoryOptions = categories?.length ? categories : fallbackFamilyCategories;
+  const exportParams = new URLSearchParams();
+  if (query) exportParams.set("q", query);
+  if (filters.minScore) exportParams.set("minScore", filters.minScore);
+  if (filters.maxScore) exportParams.set("maxScore", filters.maxScore);
+  if (filters.category) exportParams.set("category", filters.category);
+  const exportHref = `/api/families/export${exportParams.size ? `?${exportParams}` : ""}`;
 
   function pageHref(page: number) {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
     if (filters.minScore) params.set("minScore", filters.minScore);
     if (filters.maxScore) params.set("maxScore", filters.maxScore);
+    if (filters.category) params.set("category", filters.category);
     params.set("page", String(page));
     return `/families?${params.toString()}`;
   }
 
-  if (error) {
-    console.error("Families query error:", error);
+  const queryError = error ?? categoriesError;
+  if (queryError) {
+    console.error("Families page query error:", queryError);
 
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6">
@@ -80,7 +57,7 @@ export default async function FamiliesPage({ searchParams }: FamiliesPageProps) 
         </h2>
 
         <p className="mt-2 text-sm text-red-600">
-          {error.message}
+          {queryError.message}
         </p>
       </div>
     );
@@ -96,15 +73,23 @@ export default async function FamiliesPage({ searchParams }: FamiliesPageProps) 
           </p>
         </div>
 
-        <Link
-          href="/families/new"
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-        >
-          + إضافة عائلة
-        </Link>
+        <div className="flex gap-2">
+          <a
+            href={exportHref}
+            className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted"
+          >
+            تصدير Excel
+          </a>
+          <Link
+            href="/families/new"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          >
+            + إضافة عائلة
+          </Link>
+        </div>
       </div>
 
-      <form method="get" className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-[minmax(0,1fr)_150px_150px_auto_auto]">
+      <form method="get" className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-[minmax(0,1fr)_130px_130px_180px_auto_auto]">
         <input
           name="q"
           defaultValue={query}
@@ -127,6 +112,18 @@ export default async function FamiliesPage({ searchParams }: FamiliesPageProps) 
           defaultValue={filters.maxScore}
           className="rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
         />
+        <select
+          name="category"
+          defaultValue={filters.category ?? ""}
+          className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+        >
+          <option value="">كل التصنيفات</option>
+          {categoryOptions.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
         <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
           بحث وتصفية
         </button>

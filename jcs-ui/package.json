@@ -13,6 +13,7 @@
     "@supabase/supabase-js": "latest",
     "class-variance-authority": "latest",
     "clsx": "latest",
+    "jszip": "^3.10.2",
     "lucide-react": "latest",
     "next": "latest",
     "react": "latest",
@@ -24,11 +25,11 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "typescript": "latest",
-    "postcss": "8.4.49",
-    "tailwindcss": "3.4.17",
+    "autoprefixer": "10.4.20",
     "eslint": "latest",
     "eslint-config-next": "latest",
-    "autoprefixer": "10.4.20"
+    "postcss": "8.4.49",
+    "tailwindcss": "3.4.17",
+    "typescript": "latest"
   }
 }
