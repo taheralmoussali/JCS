@@ -92,6 +92,7 @@ export default function NewFamily() {
     address: "",
     phone: "",
     landline_number: "",
+    note: "",
     family_category: "",
     field_supervisor_1: "",
     field_supervisor_2: "",
@@ -149,6 +150,7 @@ export default function NewFamily() {
         address: form.address || null,
         phone: form.phone || null,
         landline_number: form.landline_number || null,
+        note: form.note || null,
         family_category: form.family_category ? Number(form.family_category) : null,
         field_supervisor_1: form.field_supervisor_1 || null,
         field_supervisor_2: form.field_supervisor_2 || null,
@@ -300,6 +302,17 @@ export default function NewFamily() {
                 </label>
               ))}
             </div>
+            <label className="mt-5 block space-y-2 text-sm">
+              <span>ملاحظات</span>
+              <textarea
+                rows={3}
+                value={form.note}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, note: event.target.value }))
+                }
+                className={inputClass}
+              />
+            </label>
           </CardContent>
         </Card>
         <Card>

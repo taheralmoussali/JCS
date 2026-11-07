@@ -141,6 +141,7 @@ export default async function FamiliesPage({ searchParams }: FamiliesPageProps) 
               <th className="px-4 py-3 text-right">العنوان</th>
               <th className="px-4 py-3 text-right">الهاتف</th>
               <th className="px-4 py-3 text-right">التقييم</th>
+              <th className="px-4 py-3 text-right">ملاحظات</th>
               <th className="px-4 py-3 text-right">إجراء</th>
             </tr>
           </thead>
@@ -169,6 +170,10 @@ export default async function FamiliesPage({ searchParams }: FamiliesPageProps) 
 
                 <td className="px-4 py-3">
                   {family.assessment_score ?? "—"}
+                </td>
+
+                <td className="px-4 py-3 whitespace-pre-wrap">
+                  {family.note || "—"}
                 </td>
 
                 <td className="px-4 py-3">

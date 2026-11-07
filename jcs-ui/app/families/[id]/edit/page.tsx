@@ -115,6 +115,7 @@ export default function EditFamilyPage() {
     address: "",
     phone: "",
     landline_number: "",
+    note: "",
     family_category: "",
     field_supervisor_1: "",
     field_supervisor_2: "",
@@ -161,7 +162,7 @@ export default function EditFamilyPage() {
         supabase
           .from("families")
           .select(
-            "file_number, beneficiary_name, national_id, family_book, address, phone, landline_number, family_category, field_supervisor_1, field_supervisor_2, study_writer, evaluator_1, evaluator_2, reviewer, study_date, assessment_score",
+            "file_number, beneficiary_name, national_id, family_book, address, phone, landline_number, note, family_category, field_supervisor_1, field_supervisor_2, study_writer, evaluator_1, evaluator_2, reviewer, study_date, assessment_score",
           )
           .eq("id", id)
           .single(),
@@ -191,6 +192,7 @@ export default function EditFamilyPage() {
           address: family.address ?? "",
           phone: family.phone ?? "",
           landline_number: family.landline_number ?? "",
+          note: family.note ?? "",
           family_category: String(family.family_category ?? ""),
           field_supervisor_1: family.field_supervisor_1 ?? "",
           field_supervisor_2: family.field_supervisor_2 ?? "",
@@ -250,6 +252,7 @@ export default function EditFamilyPage() {
         address: form.address || null,
         phone: form.phone || null,
         landline_number: form.landline_number || null,
+        note: form.note || null,
         family_category: form.family_category ? Number(form.family_category) : null,
         field_supervisor_1: form.field_supervisor_1 || null,
         field_supervisor_2: form.field_supervisor_2 || null,
@@ -479,6 +482,17 @@ export default function EditFamilyPage() {
                 </label>
               ))}
             </div>
+            <label className="mt-5 block space-y-2 text-sm">
+              <span>ملاحظات</span>
+              <textarea
+                rows={3}
+                value={form.note}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, note: event.target.value }))
+                }
+                className={inputClass}
+              />
+            </label>
           </CardContent>
         </Card>
         <Card>

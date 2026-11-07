@@ -10,6 +10,7 @@ const columns = [
   { header: "العنوان", key: "address", width: 30 },
   { header: "الهاتف", key: "phone", width: 18 },
   { header: "الهاتف الأرضي", key: "landline_number", width: 18 },
+  { header: "ملاحظات", key: "note", width: 36 },
   { header: "التصنيف", key: "category", width: 20 },
   { header: "مشرف الكشف (1)", key: "field_supervisor_1", width: 24 },
   { header: "مشرف الكشف (2)", key: "field_supervisor_2", width: 24 },
@@ -29,6 +30,7 @@ type FamilyExportRow = {
   address: string;
   phone: string;
   landline_number: string;
+  note: string;
   category: string;
   field_supervisor_1: string;
   field_supervisor_2: string;
@@ -101,6 +103,7 @@ export async function GET(request: Request) {
     address: family.address ?? "",
     phone: family.phone ?? "",
     landline_number: family.landline_number ?? "",
+    note: family.note ?? "",
     category: family.family_category !== null
       ? categoryNames.get(family.family_category) ?? `#${family.family_category}`
       : "",

@@ -37,6 +37,7 @@ export async function createFamiliesQuery(filters: FamilyFilters) {
       address,
       phone,
       landline_number,
+      note,
       field_supervisor_1,
       field_supervisor_2,
       study_writer,
@@ -53,11 +54,11 @@ export async function createFamiliesQuery(filters: FamilyFilters) {
     const fileNumber = Number(query);
     if (Number.isInteger(fileNumber)) {
       familiesQuery = familiesQuery.or(
-        `beneficiary_name.ilike.%${query}%,national_id.ilike.%${query}%,phone.ilike.%${query}%,address.ilike.%${query}%,file_number.eq.${fileNumber}`
+        `beneficiary_name.ilike.%${query}%,national_id.ilike.%${query}%,phone.ilike.%${query}%,address.ilike.%${query}%,note.ilike.%${query}%,file_number.eq.${fileNumber}`
       );
     } else {
       familiesQuery = familiesQuery.or(
-        `beneficiary_name.ilike.%${query}%,national_id.ilike.%${query}%,phone.ilike.%${query}%,address.ilike.%${query}%`
+        `beneficiary_name.ilike.%${query}%,national_id.ilike.%${query}%,phone.ilike.%${query}%,address.ilike.%${query}%,note.ilike.%${query}%`
       );
     }
   }
